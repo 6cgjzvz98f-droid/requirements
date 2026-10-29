@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoodPoint — Талаптарды талдау нұсқаулығы</title>
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1d2433; --muted:#5b667a; --line:#e2e7f0;
+  --brand:#3b4cca; --brand2:#12a594; --soft:#eceffd; --soft2:#e3f6f3;
+  --warn:#fff6e0; --warnline:#f0c36d; --bad:#fdecec; --badline:#e59a9a; --good:#e8f7ee; --goodline:#7cc79a;
+  --side:#18203a; --sidetext:#c9d1ea;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#10141f; --card:#182033; --ink:#e8ecf6; --muted:#9aa6bf; --line:#2a3550;
+    --soft:#222c52; --soft2:#14332f; --warn:#3a3118; --warnline:#8a6d25; --bad:#3a1d1f; --badline:#8a4448; --good:#17321f; --goodline:#2f7a4a; --side:#0b0f1a; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;font-size:16px}
+.layout{display:flex;min-height:100vh}
+aside{width:280px;background:var(--side);color:var(--sidetext);padding:22px 16px;position:sticky;top:0;height:100vh;overflow:auto;flex-shrink:0}
+.logo{display:flex;gap:12px;align-items:center;margin-bottom:6px}
+.logo .ic{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:grid;place-items:center;font-size:22px}
+.logo b{color:#fff;font-size:18px;display:block;line-height:1.2}
+.logo span{font-size:12px;opacity:.8}
+.sidelabel{font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.6;margin:22px 0 8px}
+nav button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;color:inherit;padding:10px 12px;border-radius:10px;font:inherit;font-size:15px;cursor:pointer}
+nav button:hover{background:rgba(255,255,255,.07)}
+nav button.active{background:rgba(255,255,255,.14);color:#fff;font-weight:600}
+nav button i{font-style:normal;width:22px;text-align:center}
+.sidenote{margin-top:24px;font-size:13px;line-height:1.5;background:rgba(255,255,255,.07);padding:12px;border-radius:10px}
+main{flex:1;min-width:0}
+.topbar{display:flex;align-items:center;gap:12px;padding:14px 28px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.topbar h2{margin:0;font-size:16px;flex:1}
+.topbar small{color:var(--muted);display:block;font-weight:400}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;border-radius:10px;font:inherit;font-size:14px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--brand)}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn.primary:hover{filter:brightness(1.1)}
+#menuBtn{display:none}
+.page{display:none;padding:28px;max-width:1000px;margin:0 auto}
+.page.active{display:block}
+.eyebrow{color:var(--brand);font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+h1{font-size:34px;line-height:1.2;margin:6px 0 12px}
+h2.sec{font-size:26px;margin:4px 0 10px}
+h3{font-size:19px;margin:26px 0 8px}
+p.lead{font-size:18px;color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.grid .card{margin:0}
+.hero{background:linear-gradient(135deg,var(--brand),#5d3fd3 60%,var(--brand2));color:#fff;border-radius:20px;padding:34px;margin-bottom:18px}
+.hero p{opacity:.92;font-size:18px;max-width:640px}
+.hero .btn{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.35)}
+.hero .btn.white{background:#fff;color:var(--brand)}
+.stats{display:flex;gap:14px;flex-wrap:wrap;margin:18px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 20px;min-width:140px}
+.stat b{font-size:28px;color:var(--brand);display:block;line-height:1.1}
+.note{border-left:5px solid var(--warnline);background:var(--warn);padding:14px 16px;border-radius:10px;margin:16px 0}
+.tip{border-left:5px solid var(--brand2);background:var(--soft2);padding:14px 16px;border-radius:10px;margin:16px 0}
+.bad{border:1px solid var(--badline);background:var(--bad);border-radius:12px;padding:12px 14px}
+.good{border:1px solid var(--goodline);background:var(--good);border-radius:12px;padding:12px 14px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:15px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft)}
+.tablewrap{overflow-x:auto}
+code,.mono{font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--soft);padding:2px 6px;border-radius:6px;font-size:.92em}
+.formula{background:var(--soft);border:1px dashed var(--brand);border-radius:12px;padding:14px 16px;font-weight:600;margin:12px 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:12px 0}
+.steps li{counter-increment:s;position:relative;padding:8px 0 8px 44px}
+.steps li::before{content:counter(s);position:absolute;left:0;top:6px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;background:var(--soft);color:var(--brand)}
+.badge.fr{background:#dfe5ff;color:#2a37a8}.badge.nfr{background:#d7f3ee;color:#0b6f63}
+/* tasks */
+.progress{height:12px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
+.progress div{height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--brand2));transition:width .3s}
+.task{background:var(--card);border:1px solid var(--line);border-radius:16px;margin:14px 0;overflow:hidden}
+.task.done{border-color:var(--goodline)}
+.thead{display:flex;gap:14px;align-items:center;padding:16px 18px;cursor:pointer}
+.thead .num{width:38px;height:38px;border-radius:50%;background:var(--soft);color:var(--brand);display:grid;place-items:center;font-weight:800;flex-shrink:0}
+.task.done .num{background:var(--brand2);color:#fff}
+.thead .tt{flex:1}
+.thead .tt b{display:block}
+.thead .tt small{color:var(--muted)}
+.tbody{display:none;padding:0 18px 18px;border-top:1px solid var(--line)}
+.task.open .tbody{display:block}
+.chev{transition:transform .2s}
+.task.open .chev{transform:rotate(180deg)}
+.doneRow{display:flex;gap:10px;align-items:center;margin-top:16px;padding:12px;background:var(--soft);border-radius:12px;font-weight:600}
+.doneRow input{width:20px;height:20px}
+.checklist{list-style:none;padding:0;margin:8px 0}
+.checklist li{padding:4px 0 4px 28px;position:relative}
+.checklist li::before{content:"☐";position:absolute;left:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+/* quiz */
+.q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:10px 0}
+.q .opts{display:flex;gap:8px;margin-top:8px}
+.q .fb{margin-top:8px;font-size:14px;display:none}
+.q.ok{border-color:var(--goodline);background:var(--good)}
+.q.no{border-color:var(--badline);background:var(--bad)}
+.q.ok .fb,.q.no .fb{display:block}
+footer{padding:24px;text-align:center;color:var(--muted);font-size:13px}
+@media (max-width:860px){
+  aside{position:fixed;left:-300px;top:0;z-index:20;transition:left .25s;height:100vh}
+  aside.open{left:0}
+  #menuBtn{display:inline-flex}
+  .page{padding:18px 16px}
+  .topbar{padding:12px 16px}
+  h1{font-size:27px}
+  .cmp{grid-template-columns:1fr}
+  .hero{padding:24px}
+}
+@media print{
+  aside,.topbar,.row,.doneRow,.btn,#quizReset{display:none!important}
+  .page{display:block!important;padding:0;max-width:none;page-break-after:always}
+  .tbody{display:block!important}
+  body{background:#fff;color:#000}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside id="side">
+  <div class="logo"><div class="ic">🍽️</div><div><b>FoodPoint</b><span>Талаптарды талдау нұсқаулығы</span></div></div>
+  <div class="sidelabel">Оқу бөлімі</div>
+  <nav id="nav">
+    <button data-go="home"><i>⌂</i> Басты бет</button>
+    <button data-go="t1"><i>①</i> Мәселені талдау</button>
+    <button data-go="t2"><i>②</i> Талаптар: FR және NFR</button>
+    <button data-go="ex"><i>▣</i> Толық мысал</button>
+    <button data-go="quiz"><i>✎</i> Өзіңді тексер</button>
+    <div class="sidelabel">Практика</div>
+    <button data-go="proj"><i>◎</i> Жоба туралы</button>
+    <button data-go="tasks"><i>☑</i> Практикалық тапсырмалар</button>
+    <div class="sidelabel">Анықтамалық</div>
+    <button data-go="terms"><i>◇</i> Терминдер</button>
+    <button data-go="grade"><i>☆</i> Бағалау және тапсыру</button>
+  </nav>
+  <div class="sidenote"><b>Пән:</b> Бағдарламалық қамтамасыз ету модульдерін бағдарламалау.<br><b>Мақсат:</b> бағдарламаны кодтамай тұрып, оның талаптарын анықтау.</div>
+</aside>
+
+<main>
+<div class="topbar">
+  <button class="btn" id="menuBtn">☰</button>
+  <h2 id="pageTitle">Басты бет<small>Практикалық жұмыс: мәселені талдау және бағдарламалық талаптар</small></h2>
+  <button class="btn" onclick="window.print()">⎙ Басып шығару</button>
+</div>
+
+<!-- HOME -->
+<section class="page" id="home">
+  <div class="hero">
+    <div class="eyebrow" style="color:#cfd6ff">Интерактивті оқу нұсқаулығы</div>
+    <h1>Бағдарлама жазбай тұрып, не жазатыныңды біл</h1>
+    <p>Бұл жұмыста мәселені қалай талдауды, бағдарламаның мақсатын қалай тұжырымдауды және функционалдық (FR) мен функционалдық емес (NFR) талаптарды қалай жазуды үйренесің.</p>
+    <div class="row">
+      <button class="btn white" data-go="tasks">Тапсырмаларды бастау →</button>
+      <button class="btn" data-go="t1">Алдымен теорияны оқу</button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>2</b>теориялық тақырып</div>
+    <div class="stat"><b>7</b>практикалық кезең</div>
+    <div class="stat"><b>100</b>бағалау ұпайы</div>
+    <div class="stat"><b>2 файл</b>қорытынды тапсыру</div>
+  </div>
+  <h3>Қалай оқимыз?</h3>
+  <ol class="steps">
+    <li><b>Теорияны оқы:</b> «Мәселені талдау» және «Талаптар» бөлімдері. Әр ұғым мысалмен түсіндірілген.</li>
+    <li><b>Толық мысалды қара:</b> «Колледж кітапханасы» жобасында бүкіл жұмыс бастан-аяқ көрсетілген.</li>
+    <li><b>Өзіңді тексер:</b> қысқа тест арқылы FR мен NFR айырмасын білетініңді тексер.</li>
+    <li><b>Тапсырманы орында:</b> FoodPoint жобасы бойынша 7 кезеңді жасап, Word құжатына жина.</li>
+    <li><b>Тапсыр:</b> .docx және .pdf файлдарын жібер.</li>
+  </ol>
+  <div class="grid">
+    <div class="card"><span class="badge">1-тақырып</span><h3 style="margin-top:8px">Мәселені талдау және мақсат</h3><p>Қазіргі жағдайды, пайдаланушыларды, қиындықтарды және жүйенің мақсатын анықтау.</p></div>
+    <div class="card"><span class="badge">2-тақырып</span><h3 style="margin-top:8px">Функционалдық және функционалдық емес талаптар</h3><p>Жүйе не істеуі керек және қандай сапа шарттарына сай болуы керек екенін өлшенетін түрде жазу.</p></div>
+  </div>
+  <div class="note"><b>Жұмыстың басты ережесі.</b> Бұл тапсырмада код жазу қажет емес. Сен жүйенің <i>не істеуі керегін</i> жазасың, <i>қалай істейтінін</i> емес. «Қай бағдарламалау тілімен жасаймыз?» деген сұрақ кейінгі кезеңге жатады.</div>
+</section>
+
+<!-- THEORY 1 -->
+<section class="page" id="t1">
+  <div class="eyebrow">1-тақырып</div>
+  <h2 class="sec">Мәселені талдау және бағдарламаның мақсатын тұжырымдау</h2>
+  <p class="lead">Кез келген бағдарлама бір мәселені шешу үшін жасалады. Мәселе дұрыс түсінілмесе, ең сапалы код та қажетсіз болып шығады.</p>
+
+  <h3>1.1. Бұл не және не үшін керек?</h3>
+  <p><b>Мәселені талдау</b> дегеніміз: қазір процесс қалай жүріп жатыр, кімге қандай қиындық туындайды, неге бұлай болады және оны бағдарлама қалай шеше алады деген сұрақтарға жауап іздеу.</p>
+  <div class="tip"><b>Ұқсастық:</b> дәрігер емдеуден бұрын диагноз қояды. Диагноз қате болса, дұрыс дәрі де көмектеспейді. Бағдарлама жобалауда да сондай: алдымен «диагноз» (мәселе), содан кейін «ем» (жүйе).</div>
+  <p>Талаптағы қате кеш анықталса, оны түзету қымбатқа түседі: жүйе құрылып біткен соң түзету жобалау кезеңіндегіден бірнеше есе қымбат тұрады. Сондықтан бастапқы талдау қысқа болса да, міндетті.</p>
+
+  <h3>1.2. Талдау қадамдары</h3>
+  <ol class="steps">
+    <li><b>Қазіргі жағдайды сипатта (AS-IS).</b> Процесс қазір қалай жұмыс істейді? Қадамдап жаз: кім, не істейді, қай жерде ақпарат сақталады.</li>
+    <li><b>Қиындықтарды тап.</b> Әр қадамда не қолайсыз? Уақыт, қате, шығын, көңілсіздік тұрғысынан қара. Мүмкін болса, сан келтір («кезекте орта есеппен 15 минут»).</li>
+    <li><b>Стейкхолдерлерді анықта.</b> Жүйеге кім қатысады немесе жүйеден кімнің пайдасы/зияны бар?</li>
+    <li><b>Себебін ізде.</b> Қиындықтың түпкі себебі неде? (5 «Неге?» әдісі, төменде).</li>
+    <li><b>Мақсатты тұжырымда.</b> Жүйе енгізілген соң жағдай қалай өзгереді? Нені өлшеп, оның өзгергенін көрсетуге болады?</li>
+    <li><b>Ауқымды белгіле (Scope).</b> Жүйеге не кіреді, не кірмейді? Бұл жобаның «шексіз ұлғайып кетуінен» сақтайды.</li>
+  </ol>
+
+  <h3>1.3. Мәселені қалай дұрыс жазу керек?</h3>
+  <p>Жақсы мәселе сипаттамасында үш нәрсе болады: <b>кімге</b> қиын, <b>не</b> қиын, <b>салдары</b> қандай. Ал шешімді (бағдарламаны) мәселенің ішіне жазбайсың.</p>
+  <div class="formula">[Кімге] + [қандай жағдайда] + [қандай қиындық бар] + [салдары не болады]</div>
+  <div class="cmp">
+    <div class="bad"><b>✗ Нашар</b><br>«Колледжде кітапхана бағдарламасы жоқ.»<br><small>Бұл мәселе емес, шешімнің жоқтығы. Кімге, не қиын екені белгісіз.</small></div>
+    <div class="good"><b>✓ Жақсы</b><br>«Студенттер қажетті кітаптың бар-жоғын білу үшін кітапханаға барып, кітапханашыдан сұрауға мәжбүр. Нәтижесінде орта есеппен 10 минут кетеді, ал кітап қолда болмай шығуы мүмкін.»</div>
+  </div>
+
+  <h3>1.4. Стейкхолдерлер</h3>
+  <p><b>Стейкхолдер</b> — жүйеге қатысы бар немесе жүйеге әсер ететін адам не топ. Олар жүйені тікелей қолданбауы да мүмкін (мысалы, колледж басшылығы есепті ғана көреді).</p>
+  <div class="tablewrap"><table>
+    <tr><th>Стейкхолдер</th><th>Рөлі</th><th>Қажеттілігі</th></tr>
+    <tr><td>Студент</td><td>Негізгі қолданушы</td><td>Кітапты тез тауып, броньдау</td></tr>
+    <tr><td>Кітапханашы</td><td>Негізгі қолданушы</td><td>Кітап беру/алуды тез тіркеу</td></tr>
+    <tr><td>Колледж әкімшілігі</td><td>Жанама қатысушы</td><td>Кітап қоры мен борыштар есебін көру</td></tr>
+  </table></div>
+  <p><b>Сұрақ-кеңес:</b> егер стейкхолдер жіберілсе, оның талабы да жіберіледі. Сондықтан тізімді құрастырғанда «тағы кім бар?» деп өзіңнен сұра.</p>
+
+  <h3>1.5. Түпкі себеп: 5 «Неге?» әдісі</h3>
+  <p>Мәселенің сыртқы көрінісін емес, түпкі себебін табу үшін «Неге?» деп 5 рет қайталап сұрайсың.</p>
+  <div class="card">
+    <b>Мәселе:</b> мерзімі өткен кітаптар көп.<br>
+    1. Неге? — Студенттер қайтару мерзімін ұмытады.<br>
+    2. Неге? — Оларға ешкім еске салмайды.<br>
+    3. Неге? — Мерзім қағаз дәптерде жазылады, кітапханашы әр күні тексермейді.<br>
+    4. Неге? — Қағаз дәптерде мерзімі өткендерді автоматты іріктеу мүмкін емес.<br>
+    5. Неге? — Бірыңғай электронды есеп жоқ.<br>
+    <b>Түпкі себеп:</b> кітап беру мен мерзімді автоматты есепке алатын жүйенің жоқтығы.
+  </div>
+  <div class="note">Әр мәселенің бір ғана себебі болмайды. Мүмкін болса, 2 түрлі тізбек құр. Бесінші «Неге?» міндетті емес: себеп анық болса, ертерек тоқтауға болады.</div>
+
+  <h3>1.6. Мақсатты тұжырымдау: SMART әдісі</h3>
+  <p>Мақсат «жақсырақ болсын» деп жазылмайды. Оның нәтижесін тексеруге болуы керек. Сол үшін <b>SMART</b> қолданамыз:</p>
+  <div class="tablewrap"><table>
+    <tr><th>Әріп</th><th>Мағынасы</th><th>Өзіңе қоятын сұрақ</th></tr>
+    <tr><td><b>S</b> — Specific</td><td>Нақты</td><td>Нақты нені жасаймыз?</td></tr>
+    <tr><td><b>M</b> — Measurable</td><td>Өлшенетін</td><td>Қандай санмен көрсетеміз?</td></tr>
+    <tr><td><b>A</b> — Achievable</td><td>Орындалатын</td><td>Қолда бар ресурспен мүмкін бе?</td></tr>
+    <tr><td><b>R</b> — Relevant</td><td>Мәселеге сай</td><td>Бұл мақсат мәселені шынымен шешеді ме?</td></tr>
+    <tr><td><b>T</b> — Time-bound</td><td>Мерзімді</td><td>Қашанға дейін?</td></tr>
+  </table></div>
+  <div class="cmp">
+    <div class="bad"><b>✗ Нашар мақсат</b><br>«Кітапхана жұмысын жақсарту».</div>
+    <div class="good"><b>✓ SMART мақсат</b><br>«Бір семестр ішінде кітап іздеу мен беруді автоматтандыратын веб-жүйе әзірлеу. Жүйе кітап іздеу уақытын 10 минуттан 1 минутқа дейін, мерзімі өткен кітап санын 30%-ға азайтуы керек.»</div>
+  </div>
+  <p><b>Негізгі мақсат</b> 1 сөйлем болады, ал оны <b>міндеттерге</b> (objectives) бөлесің. Әр міндет өлшенетін болуы керек.</p>
+
+  <h3>1.7. Ауқым (Scope): не кіреді, не кірмейді</h3>
+  <div class="grid">
+    <div class="card"><b>Кіреді</b><ul><li>Кітапты іздеу және броньдау</li><li>Кітап беру/алуды тіркеу</li><li>Мерзімі өткендер тізімі</li></ul></div>
+    <div class="card"><b>Кірмейді</b><ul><li>Электронды кітап оқу</li><li>Онлайн төлем</li><li>Басқа колледждермен интеграция</li></ul></div>
+  </div>
+  <div class="row"><button class="btn primary" data-go="t2">Келесі: Талаптар →</button></div>
+</section>
+
+<!-- THEORY 2 -->
+<section class="page" id="t2">
+  <div class="eyebrow">2-тақырып</div>
+  <h2 class="sec">Функционалдық және функционалдық емес талаптар</h2>
+  <p class="lead">Мақсат анықталған соң, жүйе нақты не істеуі керек және қандай сапада істеуі керек екенін жазамыз. Бұл жазбалар кейін жобалау мен тестілеудің негізі болады.</p>
+
+  <h3>2.1. Талап дегеніміз не?</h3>
+  <p><b>Талап</b> — жүйенің қандай мүмкіндікке немесе қандай қасиетке ие болуы керек екенін айтатын тексеруге болатын тұжырым. Талаптар екі топқа бөлінеді:</p>
+  <div class="grid">
+    <div class="card"><span class="badge fr">FR</span><h3 style="margin-top:8px">Функционалдық талап</h3><p><b>Жүйе не істеуі керек?</b> Нақты әрекеттер, функциялар, мүмкіндіктер.</p><p><i>Мысал: «Студент кітапты атауы бойынша іздей алады.»</i></p></div>
+    <div class="card"><span class="badge nfr">NFR</span><h3 style="margin-top:8px">Функционалдық емес талап</h3><p><b>Жүйе қалай істеуі керек?</b> Жылдамдық, қауіпсіздік, ыңғайлылық, сенімділік секілді сапа шарттары.</p><p><i>Мысал: «Іздеу нәтижесі 2 секундтан кеш шықпауы керек.»</i></p></div>
+  </div>
+  <div class="tip"><b>Ұқсастық:</b> автокөлікті алсақ, «ол жүреді, тоқтайды, бұрылады» — функционалдық талап. «Ол 100 км/сағ жылдамдыққа 10 секундта жетеді, қауіпсіздік сынағынан 5 жұлдыз алады» — функционалдық емес талап.</div>
+  <div class="note"><b>Қалай айыруға болады?</b> «Жүйе … істей алады» деп аяқтауға болса — көбіне FR. Егер сөйлемде өлшем бар (секунд, пайыз, адам саны, шифрлау) және оның жүйенің қалай жұмыс істейтінін сипаттаса — көбіне NFR.</div>
+
+  <h3>2.2. Функционалдық талаптарды (FR) қалай жазамыз?</h3>
+  <p>Формула:</p>
+  <div class="formula">FR-XX: [Рөл] + [әрекет] + [нысан/шарт] жасай алады / Жүйе [әрекет] жасауы керек.</div>
+  <ol class="steps">
+    <li><b>Әр рөл бойынша жаз.</b> Студент, оқытушы, әкімші үшін бөлек қарап шық: «Әр рөл жүйеде не істейді?»</li>
+    <li><b>Әр сөйлемге бір ғана әрекет қой.</b> «Іздейді және броньдайды және бас тартады» деген бір талап емес, үш талап.</li>
+    <li><b>ID бер.</b> FR-01, FR-02… Кейін оны диаграммада, тестте, құжатта атап көрсетесің.</li>
+    <li><b>Жалпы сөзден аулақ бол.</b> «Деректермен жұмыс істейді» дегеннің орнына нақты етіп: «Кітапханашы кітап карточкасын қоса, өзгерте және жоя алады».</li>
+  </ol>
+  <div class="cmp">
+    <div class="bad"><b>✗ Нашар FR</b><br>«Жүйе кітаптармен жұмыс істеуі керек.»<br><small>Қандай жұмыс? Кім істейді?</small></div>
+    <div class="good"><b>✓ Жақсы FR</b><br><b>FR-03:</b> Кітапханашы кітап беру фактісін (студент, кітап, күні) тіркей алады.</div>
+  </div>
+  <p><b>Талаптардың топтары (идея үшін):</b> тіркелу және кіру, іздеу, тапсырыс/бронь, басқару (CRUD: қосу, қарау, өзгерту, жою), есеп, хабарландыру.</p>
+
+  <h3>2.3. Функционалдық емес талаптарды (NFR) қалай жазамыз?</h3>
+  <p>NFR-дің ең жиі қателігі — «жылдам», «ыңғайлы», «қауіпсіз» деген қуыс сөздер. Бұларды <b>тексеруге болмайды</b>. NFR міндетті түрде өлшенетін болуы керек.</p>
+  <div class="formula">NFR-XX: [Жүйенің қасиеті] + [өлшем / шарт / сан]</div>
+  <div class="tablewrap"><table>
+    <tr><th>Санат</th><th>Нені қарастырады?</th><th>Нашар</th><th>Жақсы (өлшенеді)</th></tr>
+    <tr><td><b>Өнімділік</b></td><td>Жылдамдық, жүктеме</td><td>Жүйе жылдам жұмыс істесін</td><td>Бет 3 секундтан кеш ашылмайды; 200 қолданушы бір мезгілде жұмыс істей алады</td></tr>
+    <tr><td><b>Қауіпсіздік</b></td><td>Қорғау, құқықтар</td><td>Жүйе қауіпсіз болсын</td><td>Құпиясөз шифрланып сақталады; әр рөл тек өз құқығындағы бөлімді көреді</td></tr>
+    <tr><td><b>Ыңғайлылық</b></td><td>Қолдануға жеңілдігі</td><td>Интерфейс ыңғайлы болсын</td><td>Жаңа қолданушы негізгі әрекетті (бронь) 3 минутқа дейін үйренеді; 3 шерту</td></tr>
+    <tr><td><b>Сенімділік</b></td><td>Қолжетімділік, сақтық көшірме</td><td>Жүйе істен шықпасын</td><td>Жүйе айына кемінде 99% қолжетімді; деректердің көшірмесі күн сайын жасалады</td></tr>
+    <tr><td><b>Үйлесімділік</b></td><td>Құрылғы, браузер</td><td>Бәрінде жұмыс істесін</td><td>Chrome, Firefox, Edge соңғы 2 нұсқасында және телефонда (360 px экран) жұмыс істейді</td></tr>
+    <tr><td><b>Қолдау</b></td><td>Өзгерту, кеңейту оңай ма</td><td>Кейін өзгерту оңай болсын</td><td>Жаңа рөл қосу үшін код өзгермей, баптау арқылы жасалады</td></tr>
+  </table></div>
+  <div class="tip"><b>Тексеру әдісі:</b> NFR жазған соң өзіңнен сұра: «Мұны тестілеп, "орындалды / орындалмады" деп айта аламын ба?» Жауап «жоқ» болса, талапты нақтылау керек.</div>
+
+  <h3>2.4. Басымдық: MoSCoW</h3>
+  <p>Барлық талапты бір мезгілде жасау мүмкін емес. Сондықтан әр талапқа маңыздылық беріледі:</p>
+  <div class="tablewrap"><table>
+    <tr><th>Белгі</th><th>Мағынасы</th><th>Мысал</th></tr>
+    <tr><td><b>Must</b></td><td>Міндетті, онсыз жүйе жұмыс істемейді</td><td>Кітапты іздеу</td></tr>
+    <tr><td><b>Should</b></td><td>Маңызды, бірақ уақытша онсыз да болады</td><td>Мерзім туралы хабарландыру</td></tr>
+    <tr><td><b>Could</b></td><td>Болса жақсы</td><td>Қараңғы тақырып</td></tr>
+    <tr><td><b>Won't</b></td><td>Бұл нұсқада жасалмайды</td><td>Электронды кітап оқу</td></tr>
+  </table></div>
+
+  <h3>2.5. Жақсы талаптың тізімі (чек-парақ)</h3>
+  <ul class="checklist">
+    <li><b>Бірегей ID</b> бар (FR-01, NFR-01).</li>
+    <li><b>Бір ғана</b> ой бар, «және» арқылы жалғанған бірнеше әрекет жоқ.</li>
+    <li><b>Анық:</b> «жылдам», «ыңғайлы», «жақсы» сөздері жоқ немесе санмен нақтыланған.</li>
+    <li><b>Тексерілетін:</b> орындалғанын не орындалмағанын анықтауға болады.</li>
+    <li>Шешімді емес, <b>қажеттілікті</b> сипаттайды («MySQL қолдану» дегеннің орнына «деректер сақталуы керек»).</li>
+    <li>Мақсатқа немесе міндетке <b>байланысты</b> (не үшін керек екені белгілі).</li>
+    <li>Басқа талаптармен <b>қайшы келмейді</b>.</li>
+  </ul>
+  <div class="row"><button class="btn" data-go="t1">← Мәселені талдау</button><button class="btn primary" data-go="ex">Келесі: Толық мысал →</button></div>
+</section>
+
+<!-- EXAMPLE -->
+<section class="page" id="ex">
+  <div class="eyebrow">Толық мысал</div>
+  <h2 class="sec">«Колледж кітапханасы» жобасы</h2>
+  <p class="lead">Осы мысалда бүкіл жұмыс бастан-аяқ көрсетілген. Өз тапсырмаңды (FoodPoint) осыған ұқсас рәсімде.</p>
+
+  <h3>1. Қазіргі жағдай және мәселе</h3>
+  <div class="card">
+    <b>Қазіргі процесс (AS-IS):</b>
+    <ol>
+      <li>Студент кітапханаға келеді.</li>
+      <li>Кітапханашыдан керек кітапты сұрайды.</li>
+      <li>Кітапханашы қағаз каталогтан іздейді.</li>
+      <li>Кітап бар болса, оқырман карточкасына қолмен жазады.</li>
+      <li>Қайтару мерзімі дәптерде белгіленеді.</li>
+    </ol>
+    <b>Қиындықтар:</b>
+    <ul>
+      <li>Кітаптың бар-жоғын білу үшін міндетті түрде баруға тура келеді (орта есеппен 10 минут).</li>
+      <li>Қолмен жазған жазбаларда қате жиі кетеді.</li>
+      <li>Мерзімі өткен кітаптарды ешкім уақытында тексермейді.</li>
+      <li>Есеп жасау үшін дәптерді қолмен санау керек.</li>
+    </ul>
+    <b>Мәселе:</b> студенттер мен кітапханашы кітап іздеу, беру және мерзімді бақылауға көп уақыт жұмсайды. Нәтижесінде жазбаларда қате көп, кітаптар уақытында қайтарылмайды.
+  </div>
+
+  <h3>2. Стейкхолдерлер</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Стейкхолдер</th><th>Рөлі</th><th>Қажеттілігі</th><th>Күтетін нәтиже</th></tr>
+    <tr><td>Студент</td><td>Қолданушы</td><td>Кітапты тез табу</td><td>Үйден кітап бар-жоғын көру</td></tr>
+    <tr><td>Кітапханашы</td><td>Қолданушы</td><td>Беру/алуды жеңіл тіркеу</td><td>Қағазсыз есеп</td></tr>
+    <tr><td>Әкімшілік</td><td>Жанама</td><td>Борыш есебі</td><td>Мерзімі өткендер тізімі</td></tr>
+    <tr><td>Оқытушы</td><td>Қолданушы</td><td>Оқу әдебиетін табу</td><td>Пән бойынша кітаптар тізімі</td></tr>
+  </table></div>
+
+  <h3>3. Себебін талдау (5 Why)</h3>
+  <div class="card">Мерзімі өткен кітап көп → студент ұмытады → ешкім еске салмайды → есеп қағазда → автоматты іріктеу жоқ → <b>түпкі себеп: бірыңғай электронды есеп пен хабарландыру жоқ.</b></div>
+
+  <h3>4. Мақсат және міндеттер</h3>
+  <div class="card">
+    <b>Мақсат:</b> бір семестр ішінде кітап іздеу, беру және мерзімді бақылауды автоматтандыратын веб-жүйенің жобасын әзірлеу.
+    <ul>
+      <li><b>Міндет 1:</b> кітап іздеу уақытын 10 минуттан 1 минутқа дейін азайту.</li>
+      <li><b>Міндет 2:</b> мерзімі өткен кітаптар санын 30%-ға азайту.</li>
+      <li><b>Міндет 3:</b> есеп жасау уақытын 1 сағаттан 5 минутқа дейін азайту.</li>
+    </ul>
+    <b>Кіреді:</b> іздеу, броньдау, беру/алу, есеп. <b>Кірмейді:</b> электронды кітап оқу, төлем.
+  </div>
+
+  <h3>5. Функционалдық талаптар</h3>
+  <div class="tablewrap"><table>
+    <tr><th>ID</th><th>Талап</th><th>Рөл</th><th>Басымдық</th><th>Міндет</th></tr>
+    <tr><td>FR-01</td><td>Қолданушы электронды пошта мен құпиясөз арқылы жүйеге кіре алады.</td><td>Барлығы</td><td>Must</td><td>—</td></tr>
+    <tr><td>FR-02</td><td>Студент кітапты атауы немесе авторы бойынша іздей алады.</td><td>Студент</td><td>Must</td><td>1</td></tr>
+    <tr><td>FR-03</td><td>Студент кітаптың қолда бар-жоғын көре алады.</td><td>Студент</td><td>Must</td><td>1</td></tr>
+    <tr><td>FR-04</td><td>Студент кітапты броньдай алады.</td><td>Студент</td><td>Should</td><td>1</td></tr>
+    <tr><td>FR-05</td><td>Кітапханашы кітап беру фактісін (студент, кітап, күні) тіркей алады.</td><td>Кітапханашы</td><td>Must</td><td>1, 2</td></tr>
+    <tr><td>FR-06</td><td>Кітапханашы кітаптың қайтарылғанын тіркей алады.</td><td>Кітапханашы</td><td>Must</td><td>2</td></tr>
+    <tr><td>FR-07</td><td>Жүйе мерзімі өткен кітаптар тізімін автоматты түрде құрады.</td><td>Жүйе</td><td>Must</td><td>2</td></tr>
+    <tr><td>FR-08</td><td>Жүйе мерзімі аяқталуына 2 күн қалғанда студентке хабарлама жібереді.</td><td>Жүйе</td><td>Should</td><td>2</td></tr>
+    <tr><td>FR-09</td><td>Әкімші ай бойынша кітап беру есебін көре алады.</td><td>Әкімші</td><td>Should</td><td>3</td></tr>
+    <tr><td>FR-10</td><td>Кітапханашы кітап карточкасын қоса, өзгерте және жоя алады.</td><td>Кітапханашы</td><td>Must</td><td>—</td></tr>
+  </table></div>
+
+  <h3>6. Функционалдық емес талаптар</h3>
+  <div class="tablewrap"><table>
+    <tr><th>ID</th><th>Санат</th><th>Талап</th><th>Басымдық</th></tr>
+    <tr><td>NFR-01</td><td>Өнімділік</td><td>Іздеу нәтижесі 2 секундтан кеш шықпайды.</td><td>Must</td></tr>
+    <tr><td>NFR-02</td><td>Өнімділік</td><td>Жүйе бір мезгілде кемінде 200 қолданушыға қызмет көрсетеді.</td><td>Should</td></tr>
+    <tr><td>NFR-03</td><td>Қауіпсіздік</td><td>Құпиясөздер шифрланған түрде сақталады.</td><td>Must</td></tr>
+    <tr><td>NFR-04</td><td>Қауіпсіздік</td><td>Студент әкімші бөлімін көре алмайды (рөл бойынша қол жеткізу).</td><td>Must</td></tr>
+    <tr><td>NFR-05</td><td>Ыңғайлылық</td><td>Жаңа студент кітап броньдауды нұсқаулықсыз 3 минут ішінде орындай алады.</td><td>Should</td></tr>
+    <tr><td>NFR-06</td><td>Сенімділік</td><td>Жүйе айына кемінде 99% қолжетімді; деректердің сақтық көшірмесі күн сайын жасалады.</td><td>Should</td></tr>
+    <tr><td>NFR-07</td><td>Үйлесімділік</td><td>Chrome, Firefox, Edge соңғы 2 нұсқасында және 360 px телефон экранында дұрыс көрінеді.</td><td>Should</td></tr>
+  </table></div>
+
+  <h3>7. Тексеру</h3>
+  <ul class="checklist">
+    <li>Әр рөлге кемінде 1 FR бар (студент, кітапханашы, әкімші, жүйе).</li>
+    <li>Әр міндетті кемінде бір FR қамтиды.</li>
+    <li>Әр NFR өлшенеді (секунд, пайыз, адам, минут).</li>
+    <li>Талаптарда шешім (қандай база, қандай тіл) аталмаған.</li>
+  </ul>
+  <div class="row"><button class="btn" data-go="t2">← Талаптар</button><button class="btn primary" data-go="quiz">Келесі: Өзіңді тексер →</button></div>
+</section>
+
+<!-- QUIZ -->
+<section class="page" id="quiz">
+  <div class="eyebrow">Өзіңді тексер</div>
+  <h2 class="sec">Бұл FR ма, әлде NFR ма?</h2>
+  <p class="lead">Әр сөйлемді оқып, түрін таңда. Қате болса, түсіндірме шығады.</p>
+  <div id="quizBox"></div>
+  <div class="card"><b>Нәтиже:</b> <span id="quizScore">0 / 8</span></div>
+  <div class="row"><button class="btn" id="quizReset">↺ Қайта бастау</button><button class="btn primary" data-go="proj">Келесі: Жоба туралы →</button></div>
+</section>
+
+<!-- PROJECT -->
+<section class="page" id="proj">
+  <div class="eyebrow">Жоба туралы</div>
+  <h2 class="sec">FoodPoint — колледж асханасына онлайн тапсырыс</h2>
+  <p class="lead">Практикалық тапсырмалар осы жоба бойынша орындалады.</p>
+  <div class="card">
+    <h3 style="margin-top:0">Жағдай</h3>
+    <p>Колледж асханасында үзіліс 20 минут. Студенттер асхана алдында ұзақ кезекте тұрады, кейде тамақтанып үлгермей қалады. Мәзір мен бағалар тек қабырғадағы тақтада ілулі. Тапсырыстар қағазға жазылады, сондықтан қателер көп. Асхана қызметкері күніне қанша студент келетінін алдын ала білмейді, нәтижесінде кей тағамдар жетпей қалады, кейбірі артылып ысырап болады.</p>
+    <h3>Болашақ жүйе туралы идея</h3>
+    <p>Студент мәзірді телефоннан көріп, үзіліске дейін алдын ала тапсырыс береді, дайын уақытын біледі. Аспаз тапсырыстарды экраннан көріп дайындайды. Әкімші мәзір мен бағаларды басқарады және есеп көреді.</p>
+  </div>
+  <div class="grid">
+    <div class="card"><h3 style="margin-top:0">🧑‍🎓 Студент</h3>Мәзірді көреді, тапсырыс береді, тарихын қарайды.</div>
+    <div class="card"><h3 style="margin-top:0">👨‍🍳 Аспаз</h3>Тапсырыстарды көреді, дайындық мәртебесін өзгертеді.</div>
+    <div class="card"><h3 style="margin-top:0">🛡️ Әкімші</h3>Мәзір мен бағаны басқарады, есеп көреді.</div>
+    <div class="card"><h3 style="margin-top:0">🏫 Колледж әкімшілігі</h3>Асхана жұмысының есебін қарайды.</div>
+  </div>
+  <h3>Жобаға қойылатын шектеулер</h3>
+  <ul>
+    <li>Бағдарламаны іске асыру немесе код жазу міндетті емес.</li>
+    <li>Барлық талап FoodPoint жобасының логикасына сай болуы керек.</li>
+    <li>Әр талапқа жеке белгі бер: FR-01, NFR-01 және т.б.</li>
+    <li>Өз ойыңнан қосқан жағдай немесе болжам болса, оны жеке «Болжамдар» тізімінде көрсет.</li>
+  </ul>
+  <div class="note">Жоба сипаттамасында кейбір ақпарат әдейі толық берілмеген (мысалы, төлем қалай жүреді). Мұндай жерде өзіңше шешім қабылда да, оны «Болжамдар» тізіміне жаз. Нақты өмірде талап жинағанда да ашық сұрақтар осылай тіркеледі.</div>
+  <div class="row"><button class="btn primary" data-go="tasks">Тапсырмаларға өту →</button></div>
+</section>
+
+<!-- TASKS -->
+<section class="page" id="tasks">
+  <div class="eyebrow">Қадамдық нұсқаулық</div>
+  <h2 class="sec">Практикалық тапсырмалар</h2>
+  <p class="lead">Әр кезеңді ашып, нұсқау бойынша орында. Аяқтаған соң белгі қой. Прогресс осы браузерде автоматты түрде сақталады. Басқа компьютерге ауыстыру үшін төмендегі батырмаларды қолдан.</p>
+  <div class="card">
+    <b>Орындалу барысы: <span id="pText">0 / 7</span></b>
+    <div class="progress"><div id="pBar"></div></div>
+    <div class="row">
+      <button class="btn" id="saveProg">⬇ Прогресті файлға сақтау</button>
+      <button class="btn" id="loadProg">⬆ Прогресті файлдан жүктеу</button>
+      <input type="file" id="loadFile" accept=".json" style="display:none">
+    </div>
+  </div>
+  <div class="note"><b>Бастамас бұрын:</b> Word-та жаңа құжат аш. Атауы: <b>Талаптар_Фамилия.docx</b>. Әр кезеңнің нәтижесін осы құжатқа жеке бөлім етіп жаз. Бастапқы бетте: аты-жөнің, тобың, жоба атауы (FoodPoint).</div>
+  <div id="taskList"></div>
+</section>
+
+<!-- TERMS -->
+<section class="page" id="terms">
+  <div class="eyebrow">Қысқаша анықтамалық</div>
+  <h2 class="sec">Терминдер</h2>
+  <p class="lead">Талаптарды талдау кезінде жиі кездесетін ұғымдар.</p>
+  <div class="grid" id="termGrid"></div>
+  <h3>Талаптардың жиі кездесетін қателері</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Қате</th><th>Мысал</th><th>Қалай түзетеміз?</th></tr>
+    <tr><td>Қуыс сөз</td><td>Жүйе ыңғайлы болсын</td><td>Негізгі әрекет 3 шертуден аспайды</td></tr>
+    <tr><td>Бірнеше әрекет бір талапта</td><td>Студент іздейді, броньдайды және бас тартады</td><td>Үш бөлек FR жаз</td></tr>
+    <tr><td>Шешімді талап ретінде жазу</td><td>Деректер MySQL-де сақталсын</td><td>Деректер қайта іске қосқаннан кейін де сақталады</td></tr>
+    <tr><td>Рөлі жоқ</td><td>Тапсырыс беріледі</td><td>Студент тапсырыс бере алады</td></tr>
+    <tr><td>Мақсатсыз талап</td><td>Жүйеде ойын бөлімі болсын</td><td>Мақсатқа қатысы жоқ болса, алып таста</td></tr>
+  </table></div>
+</section>
+
+<!-- GRADE -->
+<section class="page" id="grade">
+  <div class="eyebrow">Қорытынды</div>
+  <h2 class="sec">Бағалау және файлдарды тапсыру</h2>
+  <p class="lead">Жұмысты тапсырар алдында барлық бөлімді тексер.</p>
+  <h3>Бағалау критерийлері — 100 ұпай</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Критерий</th><th>Ұпай</th></tr>
+    <tr><td>Мәселені талдау: қазіргі жағдай, стейкхолдерлер, себептер (1–3 кезең)</td><td>25</td></tr>
+    <tr><td>Мақсатты тұжырымдау: SMART мақсат, міндеттер, ауқым (4-кезең)</td><td>15</td></tr>
+    <tr><td>Функционалдық талаптар, кемінде 8 (5-кезең)</td><td>20</td></tr>
+    <tr><td>Функционалдық емес талаптар, кемінде 6 (6-кезең)</td><td>20</td></tr>
+    <tr><td>Басымдық (MoSCoW), байланыс кестесі және тексеру (7-кезең)</td><td>10</td></tr>
+    <tr><td>Рәсімдеу және файлдарды тапсыру</td><td>10</td></tr>
+    <tr><td><b>Барлығы</b></td><td><b>100</b></td></tr>
+  </table></div>
+  <div class="grid">
+    <div class="card"><h3 style="margin-top:0">1. Бастапқы файл</h3><b>Талаптар_Фамилия.docx</b><p>Word құжаты, барлық 7 кезең бөлек тақырыппен.</p></div>
+    <div class="card"><h3 style="margin-top:0">2. Қорытынды файл</h3><b>Талаптар_Фамилия.pdf</b><p>Word-тан «Файл → Экспорттау → PDF» арқылы алынады. Кестелер толық көрінсін.</p></div>
+  </div>
+  <div class="note"><b>Соңғы тексеру:</b>
+    <ul class="checklist">
+      <li>Мәселе сипаттамасында шешім жоқ.</li>
+      <li>Кемінде 4 стейкхолдер, кемінде 4 қиындық бар.</li>
+      <li>Мақсат SMART, кемінде 3 міндет бар.</li>
+      <li>Кемінде 8 FR және кемінде 6 NFR, әрқайсысына ID берілген.</li>
+      <li>Әр NFR санмен өлшенеді.</li>
+      <li>Әр FR-ге рөл мен басымдық (MoSCoW) жазылған.</li>
+      <li>Әр FR бір міндетпен байланысқан.</li>
+      <li>Екі файл да сақталған, фамилиясы дұрыс жазылған.</li>
+    </ul>
+  </div>
+  <div class="row"><button class="btn primary" onclick="window.print()">⎙ Нұсқаулықты басып шығару / PDF сақтау</button></div>
+</section>
+
+<footer>FoodPoint · Оқу мақсатындағы практикалық нұсқаулық · Талаптарды талдау</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  var titles = {
+    home:["Басты бет","Практикалық жұмыс: мәселені талдау және бағдарламалық талаптар"],
+    t1:["1-тақырып: Мәселені талдау","Мақсатты тұжырымдау"],
+    t2:["2-тақырып: Талаптар","Функционалдық және функционалдық емес талаптар"],
+    ex:["Толық мысал","Колледж кітапханасы"],
+    quiz:["Өзіңді тексер","FR / NFR тесті"],
+    proj:["Жоба туралы","FoodPoint"],
+    tasks:["Практикалық тапсырмалар","7 кезең"],
+    terms:["Терминдер","Қысқаша анықтамалық"],
+    grade:["Бағалау және тапсыру","100 ұпай"]
+  };
+  var pages = document.querySelectorAll('.page');
+  var navBtns = document.querySelectorAll('#nav button');
+  function show(id){
+    if(!titles[id]) id='home';
+    pages.forEach(function(p){ p.classList.toggle('active', p.id===id); });
+    navBtns.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-go')===id); });
+    document.getElementById('pageTitle').innerHTML = titles[id][0] + '<small>' + titles[id][1] + '</small>';
+    document.getElementById('side').classList.remove('open');
+    window.scrollTo(0,0);
+    try{ history.replaceState(null,'','#'+id); }catch(e){}
+  }
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-go]');
+    if(t){ show(t.getAttribute('data-go')); }
+  });
+  document.getElementById('menuBtn').addEventListener('click', function(){
+    document.getElementById('side').classList.toggle('open');
+  });
+
+  /* ---------- Tasks ---------- */
+  var tasks = [
+    {t:"Қазіргі жағдай мен мәселені сипаттау", s:"AS-IS, қиындықтар, мәселе тұжырымы", pts:"1-бөлім",
+     goal:"FoodPoint жобасындағы қазіргі жағдайды және мәселені анық жазу.",
+     steps:["«Жоба туралы» бөлімін мұқият оқы.","Қазіргі процесті 5–7 қадаммен жаз: студент асханаға келеді → … → тамақ алады.","Әр қадамда қандай қиындық барын көрсет. Кемінде 4 қиындық болсын.","Мүмкін болса, сан қос (мысалы, «кезекте орта есеппен 15 минут»). Сан белгісіз болса, болжам ретінде жаз.","Мәселені 3–4 сөйлеммен тұжырымда: кімге, не қиын, салдары қандай."],
+     result:"Құжаттың 1-бөлімі «Қазіргі жағдай және мәселе» (жарты бетке дейін).",
+     example:"«Студенттер қажетті кітаптың бар-жоғын білу үшін кітапханаға барып сұрауға мәжбүр. Нәтижесінде орта есеппен 10 минут кетеді.»  (Кітапхана мысалынан алынған. Өз жобаңа бейімде.)",
+     check:["Қазіргі процесс қадамдармен жазылған.","Кемінде 4 қиындық бар.","Мәселе сипаттамасында шешім (бағдарлама, қосымша) аталмаған.","Кем дегенде 1 сан немесе нақты мысал бар."]},
+    {t:"Стейкхолдерлерді анықтау", s:"Кесте: кім, рөлі, қажеттілігі", pts:"2-бөлім",
+     goal:"Жүйеге қатысатын барлық адамдар мен топтарды табу және олардың қажеттілігін көрсету.",
+     steps:["Жоба сипаттамасындағы рөлдерді тізімге жаз.","Жанама қатысушыларды да ойла (мысалы, колледж басшылығы, қоймашы, ата-ана).","Кесте жаса: Стейкхолдер | Рөлі | Қажеттілігі | Күтетін нәтиже.","Әр стейкхолдерге кем дегенде бір нақты қажеттілік жаз."],
+     result:"Құжаттың 2-бөлімі: кемінде 4 қатары бар кесте.",
+     example:"Студент | Негізгі қолданушы | Кітапты тез табу | Үйден бар-жоғын көру.",
+     check:["Кемінде 4 стейкхолдер бар.","Кемінде 1 жанама қатысушы көрсетілген.","Әр қатарда қажеттілік нақты жазылған (жалпы «ыңғайлы» емес)."]},
+    {t:"Түпкі себепті анықтау (5 «Неге?»)", s:"Қиындықтардан себепке дейін", pts:"3-бөлім",
+     goal:"Мәселенің сыртқы белгілерін емес, түпкі себебін табу.",
+     steps:["1-кезеңдегі ең маңызды 2 қиындықты таңда.","Әрқайсысы үшін «Неге?» деп сұрап, 3–5 деңгейге дейін жауап жаз.","Әр тізбектің соңында «Түпкі себеп» деп бір сөйлем жаз.","Түпкі себептің шешімі жүйеге қандай мүмкіндік қажет екенін көрсететінін тексер."],
+     result:"Құжаттың 3-бөлімі: кемінде 2 себеп тізбегі және 2 түпкі себеп.",
+     example:"Мерзімі өткен кітап көп → ұмытады → ешкім еске салмайды → есеп қағазда → түпкі себеп: электронды есеп пен хабарландыру жоқ.",
+     check:["Кемінде 2 тізбек бар.","Әр тізбекте кемінде 3 «Неге?» деңгейі бар.","Түпкі себеп жеке бөлек белгіленген."]},
+    {t:"Мақсатты тұжырымдау және ауқым", s:"SMART мақсат, міндеттер, TO-BE, Scope", pts:"4-бөлім",
+     goal:"Жүйенің мақсатын өлшенетін етіп жазу және жобаның шекарасын белгілеу.",
+     steps:["Негізгі мақсатты 1 сөйлеммен SMART әдісімен жаз (нақты, өлшенетін, мерзімі бар).","Мақсатты кемінде 3 міндетке бөл. Әр міндеттің өлшемі болсын (уақыт, пайыз, қате саны).","Жүйе енгізілгеннен кейінгі процесті 4–5 қадаммен жаз (TO-BE).","Ауқымды екі тізіммен көрсет: «Кіреді» (кемінде 3) және «Кірмейді» (кемінде 3).","Ашық сұрақтар мен болжамдарды жеке тізімге жаз."],
+     result:"Құжаттың 4-бөлімі: мақсат, 3 міндет, TO-BE, Scope, Болжамдар.",
+     example:"«Бір семестр ішінде кітап іздеуді автоматтандыратын жүйе жобалау; іздеу уақытын 10 минуттан 1 минутқа дейін азайту.»",
+     check:["Мақсатта сан немесе өлшем бар.","Мақсатта мерзім немесе кезең бар.","Кемінде 3 міндет, әрқайсысы өлшенеді.","«Кіреді» және «Кірмейді» тізімдері толтырылған."]},
+    {t:"Функционалдық талаптар (FR)", s:"Кемінде 8 талап, рөл, ID", pts:"5-бөлім",
+     goal:"Жүйе не істеуі керек екенін рөлдер бойынша жазу.",
+     steps:["Рөлдерді тізіп шық: студент, аспаз, әкімші, жүйе.","Әр рөл үшін «ол жүйеде не істейді?» деп өзіңнен сұра. Әр рөлге кемінде 2 талап жаз.","Формуланы қолдан: «[Рөл] [нысан] бойынша [әрекет] жасай алады».","Әр талапқа ID бер (FR-01…). Бір сөйлемде тек бір әрекет болсын.","Кестеге жаз: ID | Талап | Рөл.","Кем дегенде 1 талап жүйенің өз әрекетін сипаттасын (автоматты есептеу, хабарлама)."],
+     result:"Құжаттың 5-бөлімі: кемінде 8 FR бар кесте.",
+     example:"FR-05: Кітапханашы кітап беру фактісін (студент, кітап, күні) тіркей алады.",
+     check:["Кемінде 8 FR жазылған.","Әр талапта рөл анық көрсетілген.","Бір талапта бір ғана әрекет бар.","«Жұмыс істейді», «басқарады» сияқты жалпы сөздер нақтыланған.","Тіркелу/кіру, тапсырыс беру, мәзірді басқару сияқты негізгі мүмкіндіктер қамтылған."]},
+    {t:"Функционалдық емес талаптар (NFR)", s:"Кемінде 6 талап, өлшенетін", pts:"6-бөлім",
+     goal:"Жүйенің сапа шарттарын санмен өлшенетін түрде жазу.",
+     steps:["Санаттарды қара: өнімділік, қауіпсіздік, ыңғайлылық, сенімділік, үйлесімділік, қолдау.","Кемінде 5 түрлі санаттан бір-бірден талап жаз.","Әр талапқа өлшем қой: секунд, пайыз, адам саны, минут, нақты шарт.","Кестеге жаз: ID | Санат | Талап.","Әр талапты тексер: «Мен мұны тестілеп, орындалды/орындалмады деп айта аламын ба?»"],
+     result:"Құжаттың 6-бөлімі: кемінде 6 NFR бар кесте.",
+     example:"NFR-01: Іздеу нәтижесі 2 секундтан кеш шықпайды.",
+     check:["Кемінде 6 NFR бар.","Кемінде 5 түрлі санат қамтылған.","Әр талапта сан не тексерілетін шарт бар.","«Жылдам», «ыңғайлы», «қауіпсіз» сөздері санмен нақтыланған."]},
+    {t:"Басымдық, байланыс және тексеру", s:"MoSCoW, FR → міндет, чек-парақ", pts:"7-бөлім",
+     goal:"Талаптарды реттеп, олардың мақсатқа сай екенін тексеру.",
+     steps:["Әр FR мен NFR-ге MoSCoW басымдығын қой (Must / Should / Could / Won't). Барлығы Must болмасын.","FR кестесіне «Міндет» бағанын қос: талап 4-кезеңдегі қай міндетті қамтамасыз етеді?","Ешбір міндетке байланбаған талап болса, оны алып тастау керек пе, жоқ па, ойлан.","Әр міндетке кемінде бір талап келетінін тексер.","Қайшылықтарды тексер (мысалы, «ең қарапайым интерфейс» пен «50 бөлімі бар панель»).","Алған талаптардың қысқа тізімін жаса: «Негізгі 5 талап» (Must)."],
+     result:"Құжаттың 7-бөлімі: толықтырылған кесте, байланыс бағаны және қорытынды тексеру тізімі.",
+     example:"FR-07 | Мерзімі өткендер тізімі | Must | Міндет 2.",
+     check:["Барлық талапта басымдық бар.","Әр FR бір міндетке байланған.","Әр міндетті кемінде бір FR қамтиды.","Талаптар арасында қайшылық жоқ.","Құжат Word-та рәсімделген, PDF-ке экспортталған."]}
+  ];
+
+  var KEY='foodpoint_req_progress_v1';
+  var state={done:{},open:{}};
+  try{ var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw); if(o&&o.done) state.done=o.done; } }catch(e){}
+  function persist(){ try{ localStorage.setItem(KEY, JSON.stringify({done:state.done})); }catch(e){} }
+
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+  function renderTasks(){
+    var html='';
+    tasks.forEach(function(tk,i){
+      var n=i+1, isDone=!!state.done[n], isOpen=!!state.open[n];
+      html+='<div class="task'+(isDone?' done':'')+(isOpen?' open':'')+'" data-n="'+n+'">'
+        +'<div class="thead" data-toggle="'+n+'"><div class="num">'+(isDone?'✓':n)+'</div>'
+        +'<div class="tt"><b>'+esc(tk.t)+'</b><small>'+esc(tk.s)+' · '+esc(tk.pts)+'</small></div><div class="chev">▾</div></div>'
+        +'<div class="tbody">'
+        +'<h3>Мақсаты</h3><p>'+esc(tk.goal)+'</p>'
+        +'<h3>Не істейсің</h3><ol class="steps">'+tk.steps.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ol>'
+        +'<h3>Нәтиже</h3><p>'+esc(tk.result)+'</p>'
+        +'<div class="tip"><b>Үлгі:</b> '+esc(tk.example)+'</div>'
+        +'<h3>Өзіңді тексер</h3><ul class="checklist">'+tk.check.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>'
+        +'<label class="doneRow"><input type="checkbox" data-done="'+n+'"'+(isDone?' checked':'')+'> Бұл кезеңді орындадым</label>'
+        +'</div></div>';
+    });
+    document.getElementById('taskList').innerHTML=html;
+    updateProgress();
+  }
+  function updateProgress(){
+    var c=0; for(var i=1;i<=tasks.length;i++){ if(state.done[i]) c++; }
+    document.getElementById('pText').textContent=c+' / '+tasks.length;
+    document.getElementById('pBar').style.width=(c/tasks.length*100)+'%';
+  }
+  document.getElementById('taskList').addEventListener('click', function(e){
+    var cb=e.target.closest('[data-done]');
+    if(cb){
+      var n=cb.getAttribute('data-done');
+      if(cb.checked) state.done[n]=true; else delete state.done[n];
+      persist();
+      var card=cb.closest('.task'); card.classList.toggle('done', !!state.done[n]);
+      card.querySelector('.num').textContent = state.done[n] ? '✓' : n;
+      updateProgress();
+      return;
+    }
+    var h=e.target.closest('[data-toggle]');
+    if(h){
+      var m=h.getAttribute('data-toggle');
+      var t=h.parentNode; t.classList.toggle('open');
+      state.open[m]=t.classList.contains('open');
+    }
+  });
+  document.getElementById('saveProg').addEventListener('click', function(){
+    var blob=new Blob([JSON.stringify({done:state.done,saved:new Date().toISOString()},null,2)],{type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='foodpoint_progress.json';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  document.getElementById('loadProg').addEventListener('click', function(){ document.getElementById('loadFile').click(); });
+  document.getElementById('loadFile').addEventListener('change', function(ev){
+    var f=ev.target.files[0]; if(!f) return;
+    var r=new FileReader();
+    r.onload=function(){
+      try{ var o=JSON.parse(r.result); if(o&&o.done){ state.done=o.done; persist(); renderTasks(); } }
+      catch(e){ alert('Файл оқылмады. Дұрыс .json файлын таңда.'); }
+    };
+    r.readAsText(f);
+    ev.target.value='';
+  });
+
+  /* ---------- Quiz ---------- */
+  var qs=[
+    {t:"Студент кітапты атауы бойынша іздей алады.", a:"FR", e:"Бұл — жүйенің нақты мүмкіндігі (әрекет), сондықтан FR."},
+    {t:"Іздеу нәтижесі 2 секундтан кеш шықпауы керек.", a:"NFR", e:"Бұл мүмкіндік емес, жұмыс жылдамдығы (секунд). Бұл — өнімділік NFR."},
+    {t:"Кітапханашы кітап беру фактісін тіркей алады.", a:"FR", e:"Рөл мен әрекет бар: тіркеу. Бұл — FR."},
+    {t:"Жүйе бір мезгілде 200 қолданушыға қызмет көрсетуі керек.", a:"NFR", e:"Жүктеме мен сан бар. Бұл — өнімділік NFR."},
+    {t:"Құпиясөздер шифрланған түрде сақталады.", a:"NFR", e:"Бұл — қауіпсіздік шарты. Пайдаланушы әрекеті емес, жүйенің қасиеті."},
+    {t:"Әкімші жаңа қолданушыны қоса алады.", a:"FR", e:"Рөл мен әрекет бар. Бұл — FR."},
+    {t:"Интерфейс 360 px телефон экранында дұрыс көрінеді.", a:"NFR", e:"Бұл — үйлесімділік (құрылғыға бейімделу). NFR."},
+    {t:"Жүйе мерзімі өткен кітаптар тізімін автоматты түрде құрады.", a:"FR", e:"Жүйенің өз әрекеті де FR болады, ол функция (тізім құру)."}
+  ];
+  var score=0, answered={};
+  function renderQuiz(){
+    score=0; answered={};
+    var h='';
+    qs.forEach(function(q,i){
+      h+='<div class="q" id="q'+i+'"><b>'+(i+1)+'.</b> '+esc(q.t)
+        +'<div class="opts"><button class="btn" data-q="'+i+'" data-v="FR">FR</button><button class="btn" data-q="'+i+'" data-v="NFR">NFR</button></div>'
+        +'<div class="fb"></div></div>';
+    });
+    document.getElementById('quizBox').innerHTML=h;
+    document.getElementById('quizScore').textContent='0 / '+qs.length;
+  }
+  document.getElementById('quizBox').addEventListener('click', function(e){
+    var b=e.target.closest('[data-q]'); if(!b) return;
+    var i=b.getAttribute('data-q'); if(answered[i]) return;
+    answered[i]=true;
+    var q=qs[i], ok=b.getAttribute('data-v')===q.a;
+    if(ok) score++;
+    var box=document.getElementById('q'+i);
+    box.classList.add(ok?'ok':'no');
+    box.querySelector('.fb').innerHTML=(ok?'✓ Дұрыс. ':'✗ Дұрыс жауап: <b>'+q.a+'</b>. ')+esc(q.e);
+    box.querySelectorAll('button').forEach(function(x){ x.disabled=true; });
+    document.getElementById('quizScore').textContent=score+' / '+qs.length;
+  });
+  document.getElementById('quizReset').addEventListener('click', renderQuiz);
+
+  /* ---------- Terms ---------- */
+  var terms=[
+    ["Талап (Requirement)","Жүйенің қандай мүмкіндікке немесе қасиетке ие болуы керек екенін айтатын тексеруге болатын тұжырым."],
+    ["FR — функционалдық талап","Жүйе не істеуі керек? Мысалы: студент тапсырыс бере алады."],
+    ["NFR — функционалдық емес талап","Жүйе қандай шарттарға сай болуы керек? Мысалы: бет 3 секундта ашылады."],
+    ["Стейкхолдер","Жүйеге қатысы бар немесе жүйеден пайда/зиян көретін адам не топ."],
+    ["AS-IS","Қазіргі жағдай, процесс жүйесіз қалай жұмыс істейді."],
+    ["TO-BE","Болашақ жағдай, жүйе енгізілгеннен кейін процесс қалай болады."],
+    ["SMART","Мақсат қою әдісі: нақты, өлшенетін, орындалатын, мәселеге сай, мерзімді."],
+    ["5 Why","«Неге?» деп 5 рет сұрау арқылы түпкі себепті табу әдісі."],
+    ["Scope (ауқым)","Жобаға не кіреді, не кірмейді, оның шекарасы."],
+    ["MoSCoW","Басымдық әдісі: Must, Should, Could, Won't."],
+    ["Рөл (Actor)","Жүйемен әрекеттесетін қолданушы немесе сыртқы жүйе."],
+    ["Болжам (Assumption)","Нақты ақпарат болмағанда жасалған және жазып қойылған алғышарт."],
+    ["Байланыс (Traceability)","Талаптың қай міндетке немесе мақсатқа қызмет ететінін көрсететін сілтеме."],
+    ["Шектеу (Constraint)","Жобаға қойылатын сыртқы шарт: мерзім, бюджет, технология."]
+  ];
+  document.getElementById('termGrid').innerHTML=terms.map(function(t){
+    return '<div class="card"><b>'+esc(t[0])+'</b><p style="margin:6px 0 0">'+esc(t[1])+'</p></div>';
+  }).join('');
+
+  renderTasks();
+  renderQuiz();
+  var start=(location.hash||'').replace('#','');
+  show(titles[start]?start:'home');
+})();
+</script>
+</body>
+</html>
